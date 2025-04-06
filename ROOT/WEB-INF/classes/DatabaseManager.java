@@ -34,7 +34,7 @@ public class DatabaseManager {
 	public static ArrayList<TimeData> getListData() throws SQLException{
 		Connection con = getConnection();
 		ArrayList<TimeData> data = new ArrayList<>();
-		PreparedStatement querey = con.prepareStatement("SELECT heatingStartTime, heatingEndTime, heatingEndTime-heatingStartTime FROM heatPlateData");
+		PreparedStatement querey = con.prepareStatement("SELECT heatingStartTime, heatingEndTime, heatingEndTime-heatingStartTime FROM heatPlateData ORDER BY heatingStartTime DESC;");
 		querey.execute();
 		ResultSet rs = querey.getResultSet();
 		
