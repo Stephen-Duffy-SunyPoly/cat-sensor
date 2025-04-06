@@ -1,3 +1,11 @@
 <web-app>
+    <servlet>
+        <servlet-name>datalist</servlet-name>
+        <servlet-class>DataListServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>datalist</servlet-name>
+        <url-pattern>/listData</url-pattern>
+    </servlet-mapping>
 
 </web-app>

@@ -1,1 +1,60 @@
-Hi There
+<html lang="en-us">
+    <head>
+        <title>Cat Sensor Info</title>
+        <script>
+            window.onload = function() {
+                getAndUpdateData();
+            }
+
+            function getAndUpdateData() {
+                let table = document.getElementById("infoTable");
+                fetch('listData').then( response => {
+                   if(response.ok) {
+                       response.json().then( json => {
+                            let dataPoints = json.data;
+                            for (let i = 0; i < dataPoints.length; i++) {
+                                let row = document.createElement("tr");
+                                let activeTime = document.createElement("td");
+                                let deactTime = document.createElement("td");
+                                let heatTime = document.createElement("td");
+                                activeTime.innerHTML = dataPoints[i].activeTime;
+                                deactTime.innerHTML = dataPoints[i].deactivatedTime;
+                                heatTime.innerHTML = dataPoints[i].heatTime;
+                                row.appendChild(activeTime);
+                                row.appendChild(deactTime);
+                                row.appendChild(heatTime);
+                                table.appendChild(row);
+                            }
+                       });
+                   }
+                });
+            }
+        </script>
+        <style>
+            tr:nth-child(even) {background-color: #e0e0e0;}
+
+            table#infoTable {
+                border-width: medium;
+                border-style: outset;
+                border-spacing: initial;
+            }
+
+            td {
+                border-style: inset;
+                border-width: thin;
+            }/
+        </style>
+    </head>
+    <body>
+        <h1>Cat Sensor Info</h1>
+        <div id="info">
+            <table id="infoTable">
+                <tr>
+                    <td>Activate Time</td>
+                    <td>Deactivate Time</td>
+                    <td>Heating Length</td>
+                </tr>
+            </table>
+        </div>
+    </body>
+</html>

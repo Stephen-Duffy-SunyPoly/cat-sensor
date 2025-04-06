@@ -8,8 +8,8 @@ services:
     environment:
       # Environment variables accessible in your Tomcat application
       #DATABASE_URL: jdbc:postgresql://postgres-db:5432/mydb
-      DATABASE_USER: myuser
-      DATABASE_PASSWORD: mypassword
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: postgres
     depends_on:
       - postgres-db
     #volumes:
