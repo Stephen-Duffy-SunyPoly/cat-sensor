@@ -7,5 +7,13 @@
         <servlet-name>datalist</servlet-name>
         <url-pattern>/listData</url-pattern>
     </servlet-mapping>
+    <servlet>
+        <servlet-name>addStartTime</servlet-name>
+        <servlet-class>StartNewHeatingServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>addStartTime</servlet-name>
+        <url-pattern>/heatingStarted</url-pattern>
+    </servlet-mapping>
 
 </web-app>

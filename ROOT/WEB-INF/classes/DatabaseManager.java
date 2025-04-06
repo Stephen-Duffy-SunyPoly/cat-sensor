@@ -3,6 +3,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.Instant;
 import java.util.ArrayList;
 
 public class DatabaseManager {
@@ -11,7 +12,7 @@ public class DatabaseManager {
 	
 	static private synchronized void setupConncetion() throws SQLException {
 		String connectionProtocal = "jdbc:postgresql://";
-	    String databaseAddress = "127.0.0.1:5432";
+	    String databaseAddress = "postgres-db:5432";
 	    String databaseName = "warm-cat";
 	    String databaseUsername = System.getenv("DATABASE_USER");
 	    String databasePassword = System.getenv("DATABASE_PASSWORD");
@@ -33,7 +34,7 @@ public class DatabaseManager {
 	public static ArrayList<TimeData> getListData() throws SQLException{
 		Connection con = getConnection();
 		ArrayList<TimeData> data = new ArrayList<>();
-		PreparedStatement querey = con.prepareStatement("SELECT heatingStartTime, heatingEndTime, totalHeatTime FROM heatPlateData");
+		PreparedStatement querey = con.prepareStatement("SELECT heatingStartTime, heatingEndTime, heatingEndTime-heatingStartTime FROM heatPlateData");
 		querey.execute();
 		ResultSet rs = querey.getResultSet();
 		
@@ -41,7 +42,22 @@ public class DatabaseManager {
 			//TODO pare the date info returned
 			data.add(new TimeData(rs.getString(1), rs.getString(2), rs.getString(3)));
 		}
-		
+		querey.close();
 		return data;
+	}
+	
+	public static long startNewHeatingTimeNow() throws SQLException {
+		//INSERT INTO heatplatedata(heatingStartTime, heatingEndTime) VALUES (to_timestamp('1743917720'),to_timestamp('1743917820'))
+		Connection con = getConnection();
+		PreparedStatement querey = con.prepareStatement("INSERT INTO heatplatedata(heatingStartTime) VALUES (to_timestamp(?)) RETURNING id;");
+		querey.setLong(1, Instant.now().getEpochSecond());
+		querey.execute();
+		
+		ResultSet rs = querey.getResultSet();
+		
+		rs.next();
+		long timeID = rs.getLong(1);
+		querey.close();
+		return timeID;
 	}
 }

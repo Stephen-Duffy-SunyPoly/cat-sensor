@@ -7,7 +7,6 @@ services:
       - "8080:8080"
     environment:
       # Environment variables accessible in your Tomcat application
-      #DATABASE_URL: jdbc:postgresql://postgres-db:5432/mydb
       DATABASE_USER: postgres
       DATABASE_PASSWORD: postgres
     depends_on:
@@ -27,8 +26,8 @@ services:
     volumes:
       # Persist PostgreSQL data even if the container is stopped/removed
       - postgres_data:/var/lib/postgresql/data
-      # Optional: Mount your init.sql script to initialize the database
-      # - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      # Mount init.sql script to initialize the database
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
 
 volumes:
   postgres_data:

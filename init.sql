@@ -1,2 +1,2 @@
-CREATE TABLE heatPlateData(heatingStartTime timestamptz , heatingEndTime timestamptz , totalHeatTime timestamptz );
+CREATE TABLE heatPlateData(id bigserial NOT NULL ,heatingStartTime timestamptz , heatingEndTime timestamptz);
 

@@ -26,7 +26,7 @@ public class DataListServlet extends HttpServlet {
 			timeData = getTimeData();
 		} catch (SQLException e) {
 			response.setStatus(500);
-			response.getWriter().print("{\"error: \": \"Database Error(1)\"}");
+			response.getWriter().print("{\"error\": \"Database Error(1)\"}");
 			e.printStackTrace();
 			return;
 		}
