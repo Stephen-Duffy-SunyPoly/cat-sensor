@@ -60,4 +60,12 @@ public class DatabaseManager {
 		querey.close();
 		return timeID;
 	}
+	
+	public static void endHeatingTimeNow(long timeId) throws SQLException {
+		Connection con = getConnection();
+		PreparedStatement querey = con.prepareStatement("UPDATE heatplatedata SET heatingEndTime = to_timestamp(?) WHERE id = ?;");
+		querey.setLong(1, Instant.now().getEpochSecond());
+		querey.setLong(2, timeId);
+		querey.execute();
+	}
 }

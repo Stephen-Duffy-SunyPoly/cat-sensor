@@ -15,5 +15,13 @@
         <servlet-name>addStartTime</servlet-name>
         <url-pattern>/heatingStarted</url-pattern>
     </servlet-mapping>
+    <servlet>
+        <servlet-name>endTime</servlet-name>
+        <servlet-class>EndHeatingTimeServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>endTime</servlet-name>
+        <url-pattern>/heatingStopped</url-pattern>
+    </servlet-mapping>
 
 </web-app>
