@@ -23,5 +23,12 @@
         <servlet-name>endTime</servlet-name>
         <url-pattern>/heatingStopped</url-pattern>
     </servlet-mapping>
-
+    <servlet>
+        <servlet-name>catDetector</servlet-name>
+        <servlet-class>IsCatServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>catDetector</servlet-name>
+        <url-pattern>/isCat</url-pattern>
+    </servlet-mapping>
 </web-app>
