@@ -1,5 +1,6 @@
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.Socket;
 import java.net.URL;
 
 import jakarta.servlet.ServletException;
@@ -13,28 +14,18 @@ public class IsCatServlet extends HttpServlet {
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		
-		URL aiServerURL = new URL("http://AI_DOCER_CONTAINER_NAME:port");
-		HttpURLConnection con = (HttpURLConnection) aiServerURL.openConnection();
-		con.setRequestMethod("POST");
-		con.setDoOutput(true);
-		request.getInputStream().transferTo(con.getOutputStream());
+		Socket soc = new Socket("DOCKER_AI_CONTAINER_NAME",0);
+		//send that imcoming data to the AI Server
+		request.getInputStream().transferTo(soc.getOutputStream());
 		
-		con.connect();
-		response.setStatus(con.getResponseCode());
-		//get the response
-		String resp = new String(con.getInputStream().readAllBytes());
+		byte[] result = soc.getInputStream().readAllBytes();
+		
+		
+		String resp = new String(result);
 		
 		resp = resp.toLowerCase();
-		boolean result = false;
-		if(resp.equals("true")) {
-			result = true;
-		}
-		
-		if(result) {
-			response.getWriter().print(1);
-		}else {
-			response.getWriter().print(0);
-		}
+		soc.close();
+		response.getWriter().print((resp.equals("true"))?1:0);
 	}
 
 }
