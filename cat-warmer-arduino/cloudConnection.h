@@ -44,38 +44,10 @@ void connectToWIFI(){
   Serial.println(ip);
 }
 
+bool responseOK(HTTPResponse *response){
+  int code = response->status;
 
-/**
-@param requestPath the path and query string part of the url for the request. must begin with a /
-note this will not work with https connections
-*/
-void exampleHTTPResuest(String requestPath){
-  WiFiClient client;//HTTP client for interacting with the cloud
-  //make the connection
-  if (client.connect(CLOUD_ADDRESS.c_str(), CLOUD_PORT)) {
-    // manually set the http headers:
-    client.println("GET "+requestPath+" HTTP/1.1");//set request method, path, and protocall
-    //client.println("Host: www.google.com");
-    client.println("Connection: close");
-    client.println();
-  }else{
-    Serial.println("Error: failed to connect to cloud");
-    return;
-  }
-
-  //read the response
-  //at this time I am not entirly sure how this works
-  //I think that the read method will end up reaturning everything starting with the http response headers 
-  //if that is the case then we will need to put in some work to poase those
-  //otherwise I have no idea how we will get the status code 
-  uint32_t received_data_num = 0;
-  while (client.available()) {
-    /* actual data reception */
-    char c = client.read();
-    /* print data to serial port */
-    Serial.print(c);
-  }  
-  client.stop();
+  return code >=200 && code <300;
 }
 
 HTTPResponse readResponse(WiFiClient * client){
@@ -120,7 +92,7 @@ HTTPResponse readResponse(WiFiClient * client){
         readingHeaders = true;
       }
     } else if(readingHeaders){
-      if(c == '/n'){
+      if(c == '\n'){
         if(lineLength != 0){
           lineLength = 0;
           linePart = false;
@@ -167,3 +139,55 @@ HTTPResponse readResponse(WiFiClient * client){
 
   return response;
 }
+
+
+/**
+@param requestPath the path and query string part of the url for the request. must begin with a /
+note this will not work with https connections
+*/
+void exampleHTTPResuest(String requestPath){
+  WiFiClient client;//HTTP client for interacting with the cloud
+  //make the connection
+  if (client.connect(CLOUD_ADDRESS.c_str(), CLOUD_PORT)) {
+    // manually set the http headers:
+    client.println("GET "+requestPath+" HTTP/1.1");//set request method, path, and protocall
+    //client.println("Host: www.google.com");
+    client.println("Connection: close");
+    client.println();
+  }else{
+    Serial.println("Error: failed to connect to cloud");
+    return;
+  }
+
+  //read the response
+  //at this time I am not entirly sure how this works
+  //I think that the read method will end up reaturning everything starting with the http response headers 
+  //if that is the case then we will need to put in some work to poase those
+  //otherwise I have no idea how we will get the status code 
+  uint32_t received_data_num = 0;
+  while (client.available()) {
+    /* actual data reception */
+    char c = client.read();
+    /* print data to serial port */
+    Serial.print(c);
+  }  
+  client.stop();
+}
+
+HTTPResponse basicGetRequest(String requestPath){
+  WiFiClient client;//HTTP client for interacting with the cloud
+  //make the connection
+  if (client.connect(CLOUD_ADDRESS.c_str(), CLOUD_PORT)) {
+    // manually set the http headers:
+    client.println("GET "+requestPath+" HTTP/1.1");//set request method, path, and protocall
+    //client.println("Host: www.google.com");
+    client.println("Connection: close");
+    client.println();
+  }else{
+    Serial.println("Error: failed to connect to cloud");
+    return {};
+  }
+
+  return readResponse(&client);
+}
+
