@@ -2,7 +2,11 @@ FROM python:latest
 
 COPY . .
 
-RUN python3 -m pip install matplotlib torch torchvision torchaudio transformers
+RUN python3 -m pip install matplotlib
+RUN python3 -m pip install torch
+RUN python3 -m pip install torchvision
+RUN python3 -m pip install torchaudio
+RUN python3 -m pip install transformers
 
 RUN chmod +x segwifi.py
 
