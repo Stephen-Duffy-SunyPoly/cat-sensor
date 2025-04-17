@@ -32,6 +32,8 @@ services:
     build: ./detectAI
     ports:
       - "33333:33333"
+    environment:
+      HF_API_KEY: ${HF_API_KEY}
 
 volumes:
   postgres_data:
