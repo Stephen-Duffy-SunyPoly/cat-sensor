@@ -13,13 +13,15 @@ public class IsCatServlet extends HttpServlet {
 	
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		
-		Socket soc = new Socket("DOCKER_AI_CONTAINER_NAME",0);
+		System.out.println("Starting Socket");
+		Socket soc = new Socket("ai-server",33333);
 		//send that imcoming data to the AI Server
+		System.out.println("Connected");
 		request.getInputStream().transferTo(soc.getOutputStream());
-		
+		soc.shutdownOutput();//force end of stream so if less data then the buffer amount is sent it will not stay in an infinite loop forever
+		System.out.println("Input passed in");
 		byte[] result = soc.getInputStream().readAllBytes();
-		
+		System.out.println("output recieved");
 		
 		String resp = new String(result);
 		

@@ -16,8 +16,8 @@ import PIL.Image as Image
 #Fix so torch and matplotlib don't **** each other.
 import os
 os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
-
-HOST = '127.0.0.1'  # The IP address of your computer
+#set host to 0.0.0.0 to bind to any/all interfaces
+HOST = '0.0.0.0'  # The IP address of your computer
 PORT = 33333           # Port to listen on
 
 access_token = ""
