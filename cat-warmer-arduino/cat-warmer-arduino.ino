@@ -12,7 +12,17 @@ void setup(){
   //do any other required setup here
 
   //test to se what a repsonse looks like
-  exampleHTTPResuest("/");
+  Serial.println("Attempting HTTP Request");
+  //exampleHTTPResuest("/");
+  HTTPResponse response = basicGetRequest("/");
+  Serial.print("Code: ");
+  Serial.println(response.status);
+  Serial.print("length: ");
+  Serial.println(response.contentLength);
+  Serial.print("content: ");
+  Serial.println(response.content);
+
+  Serial.println("RESUEST COMPLETED!");
 
 }
 

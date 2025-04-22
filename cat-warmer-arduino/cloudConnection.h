@@ -6,7 +6,7 @@ const char WIFI_PASSWORD[] = "WIFI PASSWORD HERE";
 int status = WL_IDLE_STATUS;
 
 
-const String CLOUD_ADDRESS = "192.168.0.0";//make sure to set this to the correct ip for the cloud device
+const String CLOUD_ADDRESS = "192.168.137.1";//make sure to set this to the correct ip for the cloud device
 const uint16_t CLOUD_PORT = 8080;
 
 struct HTTPResponse{
@@ -151,14 +151,14 @@ void exampleHTTPResuest(String requestPath){
   if (client.connect(CLOUD_ADDRESS.c_str(), CLOUD_PORT)) {
     // manually set the http headers:
     client.println("GET "+requestPath+" HTTP/1.1");//set request method, path, and protocall
-    //client.println("Host: www.google.com");
+    client.println("Host: example.internal");
     client.println("Connection: close");
     client.println();
   }else{
     Serial.println("Error: failed to connect to cloud");
     return;
   }
-
+  delay(1000);
   //read the response
   //at this time I am not entirly sure how this works
   //I think that the read method will end up reaturning everything starting with the http response headers 
@@ -170,7 +170,10 @@ void exampleHTTPResuest(String requestPath){
     char c = client.read();
     /* print data to serial port */
     Serial.print(c);
+    received_data_num++;
   }  
+  Serial.print(" ");
+  Serial.println(received_data_num);
   client.stop();
 }
 
@@ -180,12 +183,16 @@ HTTPResponse basicGetRequest(String requestPath){
   if (client.connect(CLOUD_ADDRESS.c_str(), CLOUD_PORT)) {
     // manually set the http headers:
     client.println("GET "+requestPath+" HTTP/1.1");//set request method, path, and protocall
-    //client.println("Host: www.google.com");
+    client.println("Host: example.internal");//the only header that is required by the HTTP standard
     client.println("Connection: close");
     client.println();
   }else{
     Serial.println("Error: failed to connect to cloud");
     return {};
+  }
+  //wait a momnet fot the request to reach the cloud
+  while(!client.available()){
+    delay(1);
   }
 
   return readResponse(&client);
