@@ -185,10 +185,36 @@ HTTPResponse basicGetRequest(String requestPath){
     client.println("GET "+requestPath+" HTTP/1.1");//set request method, path, and protocall
     client.println("Host: example.internal");//the only header that is required by the HTTP standard
     client.println("Connection: close");
-    client.println();
+    client.println();//blank line to seperate the headers and data
   }else{
     Serial.println("Error: failed to connect to cloud");
     return {};
+  }
+  //wait a momnet fot the request to reach the cloud
+  while(!client.available()){
+    delay(1);
+  }
+
+  return readResponse(&client);
+}
+
+HTTPResponse basicPostRequest(String requestPath,char data[], int dataLength){
+  WiFiClient client;//HTTP client for interacting with the cloud
+  //make the connection
+  if (client.connect(CLOUD_ADDRESS.c_str(), CLOUD_PORT)) {
+    // manually set the http headers:
+    client.println("POST "+requestPath+" HTTP/1.1");//set request method, path, and protocall
+    client.println("Host: example.internal");//the only header that is required by the HTTP standard
+    client.println("Connection: close");
+    client.print("Content-Length: "); client.println(dataLength);
+    client.println();//blank line to seperate the headers and data
+    //send the post data here
+    for(int i=0;i<dataLength;i++){
+      client.print(data[i]);
+    }
+  }else{
+    Serial.println("Error: failed to connect to cloud");
+    return {};//return  an empty structure
   }
   //wait a momnet fot the request to reach the cloud
   while(!client.available()){

@@ -1,4 +1,5 @@
-
+/**simple data structure to hold the relevant time data
+ */
 public class TimeData {
 	String heatingStartTime;
 	String heatingEndTime;

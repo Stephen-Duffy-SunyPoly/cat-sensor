@@ -11,11 +11,8 @@ public class DataListServlet extends HttpServlet {
 
 
 	private static final long serialVersionUID = 1L;
-	
-	//tmp
-	TimeData td1 = new TimeData("10:00","11:00","1:00"),td2 = new TimeData("10:00","11:00","1:00"),td3 = new TimeData("10:00","11:00","1:00");
-	
-	//wen a get request reaches this end point
+		
+	//when a get request reaches this end point for the path /listData
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		//set the response content type
@@ -23,6 +20,7 @@ public class DataListServlet extends HttpServlet {
 		//get the data and format it into a json array
 		ArrayList<TimeData> timeData;
 		try {
+			//get the data from the database
 			timeData = getTimeData();
 		} catch (SQLException e) {
 			response.setStatus(500);
@@ -30,6 +28,7 @@ public class DataListServlet extends HttpServlet {
 			e.printStackTrace();
 			return;
 		}
+		//convert that data into a json format
 		String[] timeDataJsons = timeData.stream().map(data -> data.toJson()).toArray(String[]::new);
 		String stringafitedJSON = String.join(",",timeDataJsons);
 		//send the data
@@ -39,7 +38,6 @@ public class DataListServlet extends HttpServlet {
 	public ArrayList<TimeData> getTimeData() throws SQLException{
 		//get data from the database
 		ArrayList<TimeData> data = DatabaseManager.getListData();
-
 		return data;
 	}
 
