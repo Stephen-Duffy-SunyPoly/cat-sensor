@@ -1,8 +1,8 @@
 #include <WiFiS3.h>
 
 //WARNING NEVER COMMIT ACTUAL WIFI CREDENTIALS
-const char WIFI_NAME[] = "WIFI NAME HERE";
-const char WIFI_PASSWORD[] = "WIFI PASSWORD HERE";
+const char WIFI_NAME[] = "CBI2 2796";
+const char WIFI_PASSWORD[] = "2]766E7e";
 int status = WL_IDLE_STATUS;
 
 
@@ -20,7 +20,7 @@ struct HTTPResponse{
 void connectToWIFI(){
   // check for the WiFi module:
   if (WiFi.status() == WL_NO_MODULE) {
-    Serial.println("Communication with WiFi module failed!");
+    //Serial.println("Communication with WiFi module failed!");
     // don't continue
     while (true){
       delay(1000);
@@ -29,8 +29,8 @@ void connectToWIFI(){
 
   // attempt to connect to WiFi network:
   while (status != WL_CONNECTED) {
-    Serial.print("Attempting to connect to WPA SSID: ");
-    Serial.println(WIFI_NAME);
+    // Serial.print("Attempting to connect to WPA SSID: ");
+    // Serial.println(WIFI_NAME);
     // Connect to WPA/WPA2 network:
     status = WiFi.begin(WIFI_NAME, WIFI_PASSWORD);
 
@@ -38,10 +38,10 @@ void connectToWIFI(){
     delay(10000);
   }
   // you're connected now, so print out the data:
-  Serial.println("Connected to the network");
+  //Serial.println("Connected to the network");
   IPAddress ip = WiFi.localIP();
-  Serial.print("IP Address: ");
-  Serial.println(ip);
+  //Serial.print("IP Address: ");
+  //Serial.println(ip);
 }
 
 bool responseOK(HTTPResponse *response){
@@ -137,6 +137,8 @@ HTTPResponse readResponse(WiFiClient * client){
 
   response.content = buffer;
 
+  client->stop();
+
   return response;
 }
 
@@ -155,7 +157,7 @@ void exampleHTTPResuest(String requestPath){
     client.println("Connection: close");
     client.println();
   }else{
-    Serial.println("Error: failed to connect to cloud");
+    //Serial.println("Error: failed to connect to cloud");
     return;
   }
   delay(1000);
@@ -169,11 +171,11 @@ void exampleHTTPResuest(String requestPath){
     /* actual data reception */
     char c = client.read();
     /* print data to serial port */
-    Serial.print(c);
+    //Serial.print(c);
     received_data_num++;
   }  
-  Serial.print(" ");
-  Serial.println(received_data_num);
+  //Serial.print(" ");
+  //Serial.println(received_data_num);
   client.stop();
 }
 
@@ -187,7 +189,7 @@ HTTPResponse basicGetRequest(String requestPath){
     client.println("Connection: close");
     client.println();//blank line to seperate the headers and data
   }else{
-    Serial.println("Error: failed to connect to cloud");
+    //Serial.println("Error: failed to connect to cloud");
     return {};
   }
   //wait a momnet fot the request to reach the cloud
@@ -213,7 +215,37 @@ HTTPResponse basicPostRequest(String requestPath,char data[], int dataLength){
       client.print(data[i]);
     }
   }else{
-    Serial.println("Error: failed to connect to cloud");
+    //Serial.println("Error: failed to connect to cloud");
+    return {};//return  an empty structure
+  }
+  //wait a momnet fot the request to reach the cloud
+  while(!client.available()){
+    delay(1);
+  }
+
+  return readResponse(&client);
+}
+
+HTTPResponse setialInputPostRequest(String requestPath, int dataLength){
+  WiFiClient client;//HTTP client for interacting with the cloud
+  //make the connection
+  if (client.connect(CLOUD_ADDRESS.c_str(), CLOUD_PORT)) {
+    // manually set the http headers:
+    client.println("POST "+requestPath+" HTTP/1.1");//set request method, path, and protocall
+    client.println("Host: example.internal");//the only header that is required by the HTTP standard
+    client.println("Connection: close");
+    client.print("Content-Length: "); client.println(dataLength);
+    client.println();//blank line to seperate the headers and data
+    //send the post data here
+    bool ls = false;
+    for(int i=0;i<dataLength;i++){
+      client.print((char)Serial1.read());
+      digitalWrite(LED_BUILTIN, ls);
+      ls=!ls;
+    }
+    Serial1.write((char)0);
+  }else{
+    //Serial.println("Error: failed to connect to cloud");
     return {};//return  an empty structure
   }
   //wait a momnet fot the request to reach the cloud

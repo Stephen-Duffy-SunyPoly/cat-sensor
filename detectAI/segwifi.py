@@ -55,7 +55,7 @@ while True:
         #print("Recieved " + str(len(buffer)) + " bytes.\n")
 
         #convert the input bytes to an image
-        image = Image.frombytes('RGB', (640, 480), buffer)
+        image = Image.frombytes('RGB', (320, 240), buffer)
 
         #create the AI
         p = pipeline("image-segmentation", use_fast=True, model=model, token=access_token)
@@ -73,7 +73,7 @@ while True:
             #check if this thing is a cat
             if s['label'] == 'cat':
                 has_cat = True
-        #print("Image " + ("does" if has_cat else "does not") +" contain a cat.")
+        print("Image " + ("does" if has_cat else "does not") +" contain a cat.")
         #print(has_cat)
         #print(str(has_cat).encode())
 
