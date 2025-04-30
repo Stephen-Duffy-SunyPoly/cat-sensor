@@ -1,9 +1,15 @@
 
 #include "cloudConnection.h"
 
+#define IMAGE_DATA_LENGTH 340*520
+
 bool heating = false;
 String currentHeatingEventID = "";
 
+
+void takePicture(char * dataOut){
+
+}
 
 void setup(){
   Serial.begin(9600);
@@ -37,12 +43,11 @@ void loop(){
     //check the sensor value to see if there might not be a cat there anymore
 
     //take a picture with the camera 
-    char imageData[];
-    int imageDataLength;
+    char imageData[IMAGE_DATA_LENGTH];
     bool isCat;
     //send the picture to the could for processing
-    HTTPResponse catImageresponse = basicPostRequest("/isCat",imageData,imageDataLength);
-    if(responseOK(catImageresponse)){
+    HTTPResponse catImageresponse = basicPostRequest("/isCat",imageData,IMAGE_DATA_LENGTH);
+    if(responseOK(&catImageresponse)){
       isCat = catImageresponse.content[0] == '1';
     }else{
       //perhaps stop heating here just to be safe
@@ -61,7 +66,7 @@ void loop(){
 
       //tell the cloud that heating has stopped using the heating event ID from before
       HTTPResponse heatingStartResponse = basicGetRequest("/heatingStopped?id="+currentHeatingEventID);
-      if(responseOK(heatingStartResponse)){
+      if(responseOK(&heatingStartResponse)){
         //evenrthiong is fine, not need to do much
       }else{
         Serial.print("Cloud returned an error: ");
@@ -83,12 +88,11 @@ void loop(){
 
     //take a picture with the camera
 
-    char imageData[];
-    int imageDataLength;
+    char imageData[IMAGE_DATA_LENGTH];
     bool isCat;
     //send the picture to the could for processing
-    HTTPResponse catImageresponse = basicPostRequest("/isCat",imageData,imageDataLength);
-    if(responseOK(catImageresponse)){
+    HTTPResponse catImageresponse = basicPostRequest("/isCat",imageData,IMAGE_DATA_LENGTH);
+    if(responseOK(&catImageresponse)){
       isCat = catImageresponse.content[0] == '1';
     }else{
       Serial.print("Cloud returned an error: ");
@@ -104,7 +108,7 @@ void loop(){
 
       //tell the cloud heating has started and recieve the heating event ID
       HTTPResponse heatingStartResponse = basicGetRequest("/heatingStarted");
-      if(responseOK(heatingStartResponse)){
+      if(responseOK(&heatingStartResponse)){
         currentHeatingEventID = heatingStartResponse.content;
       }else{
         Serial.print("Cloud returned an error: ");
