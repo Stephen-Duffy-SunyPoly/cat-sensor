@@ -35,8 +35,8 @@ while True:
         # Accept a connection
         print(f"Connected by {addr}")
         buffer = b''
-        while len(buffer) < 614400:
-            data = conn.recv(614400)  # Receive up to 6 megabytes of data (a 1080p image)
+        while len(buffer) < 320*240*2:
+            data = conn.recv(320*240*2)  # Receive up to 6 megabytes of data (a 1080p image)
             #print("Recieved " + str(len(data)) + " bytes.\n")
         
             buffer += data
