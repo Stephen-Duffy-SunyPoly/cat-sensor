@@ -16,10 +16,10 @@ import numpy as np
 import os
 os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 
-HOST = '192.168.254.106'  # The IP address of your computer
+HOST = '0.0.0.0'  # The IP address of your computer
 PORT = 33333           # Port to listen on
 
-access_token = ""
+access_token = os.getenv("HF_API_KEY")
 model="google/deeplabv3_mobilenet_v2_1.0_513"
 
 # Create the socket
@@ -30,9 +30,9 @@ server_socket.listen(1)
 print(f"Listening on {HOST}:{PORT}...")
 
 while True:
+    conn, addr = server_socket.accept()
     try:
         # Accept a connection
-        conn, addr = server_socket.accept()
         print(f"Connected by {addr}")
         buffer = b''
         while len(buffer) < 614400:
@@ -77,9 +77,13 @@ while True:
             if s['label'] == 'cat':
                 has_cat = True
         print("Image " + ("does" if has_cat else "does not") +" contain a cat.")
-        
-        conn.send(has_cat.to_bytes())
-        
-        conn.close()
-    except:
-        print("An error occured.")
+        #print(has_cat)
+        #print(str(has_cat).encode())
+
+        #send the result back to the back end
+        conn.send(str(has_cat).encode())
+    except Exception as e:
+        print("an error occored")
+        print(e)
+    #close the connection
+    conn.close()

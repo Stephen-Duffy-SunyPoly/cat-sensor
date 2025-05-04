@@ -14,7 +14,7 @@ uint8_t frame[8][12] = {
 
 #include "cloudConnection.h"
 
-#define IMAGE_DATA_LENGTH 320*240*2
+#define IMAGE_DATA_LENGTH 640*480*2
 
 bool heating = false;
 String currentHeatingEventID = "";
@@ -50,7 +50,7 @@ void checkCatHeating(){
     Serial1.write((char)1);//singal the camera to start sending image data
     HTTPResponse catImageresponse = setialInputPostRequest("/isCat",IMAGE_DATA_LENGTH);//read image / send image to the cloud
 
-    
+
     if(responseOK(&catImageresponse)){
       isCat = catImageresponse.content[0] == '1';
     }else{
