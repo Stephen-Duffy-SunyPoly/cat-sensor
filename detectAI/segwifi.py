@@ -11,6 +11,7 @@ from transformers import pipeline
 import matplotlib.pyplot as plt
 import PIL.Image as Image
 import numpy as np
+import traceback
 
 #Fix so torch and matplotlib don't **** each other.
 import os
@@ -60,15 +61,17 @@ while True:
         rgb888[:, 0] = (rgb888[:, 0] << 3) | (rgb888[:, 0] >> 2)  # Scale Red
         rgb888[:, 1] = (rgb888[:, 1] << 2) | (rgb888[:, 1] >> 4)  # Scale Green
         rgb888[:, 2] = (rgb888[:, 2] << 3) | (rgb888[:, 2] >> 2)  # Scale Blue
-        
-        rgb888.reshape(640, 480, 3)
-        
+
+        rgb888 = rgb888.reshape(320, 240, 3)
+
         image = Image.fromarray(rgb888, "RGB")
         
         p = pipeline("image-segmentation", use_fast=True, model=model, token=access_token)
         
         segments = p(image)
-        
+
+        image.save("capture.png")
+
         has_cat = False
         for s in segments:
             plt.figure()
@@ -83,6 +86,7 @@ while True:
         #send the result back to the back end
         conn.send(str(has_cat).encode())
     except Exception as e:
+        traceback.print_exc()
         print("an error occored")
         print(e)
     #close the connection
