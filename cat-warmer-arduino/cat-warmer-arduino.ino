@@ -18,7 +18,9 @@ uint8_t frame[8][12] = {
 
 
 #include "HX711.h"
+#include "DHT.h"
 
+#define REPLAY_PIN 9
 #define scaleDataPin 7
 #define scaleClockPin 8
 HX711 h;
@@ -26,11 +28,16 @@ HX711 h;
 #define MIN_ON_WEIGHT 10.0
 #define MIN_OFF_WEIGHT 9.0
 
+#define DHTTYPE DHT11
+#define DHTPIN 10
+DHT dht(DHTPIN, DHTTYPE);
 
+#define MAC_TEMP_ALLOWED 30.0
 
 
 
 bool heating = false;
+bool tooHot = false;
 String currentHeatingEventID = "";
 
 float readScale(){
@@ -40,6 +47,15 @@ float readScale(){
     //Serial.println(weight);
   }
   return h.get_value();
+}
+
+void checkTooHot(){
+  float t = dht.readTemperature();
+  if(isnan(t)){
+    return;
+  }
+
+  tooHot = t > MAC_TEMP_ALLOWED;
 }
 
 void setup(){
@@ -60,6 +76,10 @@ void setup(){
   //setup and zero the sacle
   h.begin(scaleDataPin, scaleClockPin);
   h.tare();
+
+  dht.begin();
+
+  pinMode(REPLAY_PIN, OUTPUT);
 
   digitalWrite(LED_BUILTIN, HIGH);
 }
@@ -169,8 +189,12 @@ void loop(){
   }
 
   //wait a momnent before checking again
+  delay(200);
 
   //heating controlll thigns prbly
+  checkTooHot();
+
+  digitalWrite(REPLAY_PIN, heating && !tooHot);
   while(1){
     delay(5000);
   }
