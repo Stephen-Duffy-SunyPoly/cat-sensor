@@ -21,6 +21,7 @@ docker compose down
 
 ## Arduino setup
 1. Install the Arduino R4 WIFI board in your arduino IDE
+2. install the HX711 library by Rob Till
 2. In `cloudConnection.h` enter the name of your WIFI network where it says `WIFI NAME HERE`, do the same thing for where it says `WIFI PASSWORD HERE`
 3. In `cloudConnection.h` change the value of `CLOUD_ADDRESS` to be the IP address of your could device
 4. Upload the code to the Arduino
