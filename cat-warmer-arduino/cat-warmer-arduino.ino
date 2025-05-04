@@ -11,10 +11,13 @@ uint8_t frame[8][12] = {
   { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
   { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 };
+#define NUMBER_OF_IMAGE_LINES 240
+#define IMAGE_DATA_LENGTH 320*NUMBER_OF_IMAGE_LINES*2
 
 #include "cloudConnection.h"
 
-#define IMAGE_DATA_LENGTH 320*240*2
+
+
 
 bool heating = false;
 String currentHeatingEventID = "";
@@ -47,8 +50,7 @@ void checkCatHeating(){
     //take a picture with the camera
     bool isCat=true;;
     //send the picture to the could for processing
-    Serial1.write((char)1);//singal the camera to start sending image data
-    HTTPResponse catImageresponse = setialInputPostRequest("/isCat",IMAGE_DATA_LENGTH);//read image / send image to the cloud
+    HTTPResponse catImageresponse = setialInputPostRequest("/isCat",IMAGE_DATA_LENGTH, NUMBER_OF_IMAGE_LINES);//read image / send image to the cloud
 
 
     if(responseOK(&catImageresponse)){
@@ -93,8 +95,7 @@ void checkCatNotHeating(){
     //take a picture with the camera
     bool isCat=true;;
     //send the picture to the could for processing
-    Serial1.write((char)1);//singal the camera to start sending image data
-    HTTPResponse catImageresponse = setialInputPostRequest("/isCat",IMAGE_DATA_LENGTH);//read image / send image to the cloud
+    HTTPResponse catImageresponse = setialInputPostRequest("/isCat",IMAGE_DATA_LENGTH, NUMBER_OF_IMAGE_LINES);//read image / send image to the cloud
     
     //check the response status
     if(responseOK(&catImageresponse)){
@@ -138,4 +139,7 @@ void loop(){
   //wait a momnent before checking again
 
   //heating controlll thigns prbly
+  while(1){
+    delay(5000);
+  }
 }

@@ -226,7 +226,7 @@ HTTPResponse basicPostRequest(String requestPath,char data[], int dataLength){
   return readResponse(&client);
 }
 
-HTTPResponse setialInputPostRequest(String requestPath, int dataLength){
+HTTPResponse setialInputPostRequest(String requestPath, int dataLength, int numLines){
   WiFiClient client;//HTTP client for interacting with the cloud
   //make the connection
   if (client.connect(CLOUD_ADDRESS.c_str(), CLOUD_PORT)) {
@@ -239,17 +239,18 @@ HTTPResponse setialInputPostRequest(String requestPath, int dataLength){
     
 
     int index = 0;//index for the a=matix LED's
-    char byteBuffer[100];//tmp buffer to hold some of the data localy
+    char byteBuffer[IMAGE_DATA_LENGTH/NUMBER_OF_IMAGE_LINES];//tmp buffer to hold some of the data localy
     Serial1.available();//may ne be nessarry
     //loop enough times to read all the data
-    for(int i=0;i<dataLength;i+=100){
-      //read 100 bytes from the serial connection
-      Serial1.readBytes(byteBuffer,100);
+    for(int i=0;i<dataLength;i+=IMAGE_DATA_LENGTH/NUMBER_OF_IMAGE_LINES){
+      Serial1.write((char)1);//singal the camera to start sending image data
+      //read a single line worth of bytes bytes from the serial connection
+      Serial1.readBytes(byteBuffer,IMAGE_DATA_LENGTH/NUMBER_OF_IMAGE_LINES);
       //wright those bytes to the could
-      client.write(byteBuffer,100);
+      client.write(byteBuffer,IMAGE_DATA_LENGTH/NUMBER_OF_IMAGE_LINES);
       //stuf for animating the LED matix
-      if(i%100 == 0){
-        //1 light = 1000 bytes
+      if(true){
+        //1 light = 1 line 
         uint8_t * frame2 = (uint8_t *)frame;
         frame2[index] = frame2[index]==1?0:1;
         matrix.renderBitmap(frame, 8, 12);
