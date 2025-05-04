@@ -236,13 +236,27 @@ HTTPResponse setialInputPostRequest(String requestPath, int dataLength){
     client.println("Connection: close");
     client.print("Content-Length: "); client.println(dataLength);
     client.println();//blank line to seperate the headers and data
-    //send the post data here
-    bool ls = false;
-    for(int i=0;i<dataLength;i++){
-      client.print((char)Serial1.read());
-      digitalWrite(LED_BUILTIN, ls);
-      ls=!ls;
+    
+
+    int index = 0;//index for the a=matix LED's
+    char byteBuffer[100];//tmp buffer to hold some of the data localy
+    Serial1.available();//may ne be nessarry
+    //loop enough times to read all the data
+    for(int i=0;i<dataLength;i+=100){
+      //read 100 bytes from the serial connection
+      Serial1.readBytes(byteBuffer,100);
+      //wright those bytes to the could
+      client.write(byteBuffer,100);
+      //stuf for animating the LED matix
+      if(i%100 == 0){
+        //1 light = 1000 bytes
+        uint8_t * frame2 = (uint8_t *)frame;
+        frame2[index] = frame2[index]==1?0:1;
+        matrix.renderBitmap(frame, 8, 12);
+        index = (index+1) % (8*12);
+      }
     }
+    //make sure to tell the camera not to send more data
     Serial1.write((char)0);
   }else{
     //Serial.println("Error: failed to connect to cloud");
