@@ -178,11 +178,11 @@ void checkCatNotHeating(){
       if(responseOK(&heatingStartResponse)){
         currentHeatingEventID = heatingStartResponse.content;
 
-        Serial.println(heatingStartResponse.status);
-        Serial.println(heatingStartResponse.contentLength);
-        Serial.println(heatingStartResponse.contentType);
-        Serial.println(heatingStartResponse.contentEncoding);
-        Serial.println(heatingStartResponse.content);
+        // Serial.println(heatingStartResponse.status);
+        // Serial.println(heatingStartResponse.contentLength);
+        // Serial.println(heatingStartResponse.contentType);
+        // Serial.println(heatingStartResponse.contentEncoding);
+        // Serial.println(heatingStartResponse.content);
       }else{
         // Serial.print("Cloud returned an error: ");
         // Serial.println(heatingStartResponse.status);
