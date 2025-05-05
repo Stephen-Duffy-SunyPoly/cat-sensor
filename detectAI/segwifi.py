@@ -62,7 +62,7 @@ while True:
         rgb888[:, 1] = (rgb888[:, 1] << 2) | (rgb888[:, 1] >> 4)  # Scale Green
         rgb888[:, 2] = (rgb888[:, 2] << 3) | (rgb888[:, 2] >> 2)  # Scale Blue
 
-        rgb888 = rgb888.reshape(320, 240, 3)
+        rgb888 = rgb888.reshape(240, 320, 3)
 
         image = Image.fromarray(rgb888, "RGB")
         

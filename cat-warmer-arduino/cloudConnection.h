@@ -90,6 +90,7 @@ HTTPResponse readResponse(WiFiClient * client){
       if(c == '\n'){
         readStatusPt2 = false;
         readingHeaders = true;
+        continue;
       }
     } else if(readingHeaders){
       if(c == '\n'){

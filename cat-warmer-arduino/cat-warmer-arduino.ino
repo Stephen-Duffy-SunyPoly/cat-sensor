@@ -25,8 +25,8 @@ uint8_t frame[8][12] = {
 #define scaleClockPin 8
 HX711 h;
 
-#define MIN_ON_WEIGHT 10.0
-#define MIN_OFF_WEIGHT 9.0
+#define MIN_ON_WEIGHT 4.2
+#define MIN_OFF_WEIGHT 4.0
 
 #define DHTTYPE DHT11
 #define DHTPIN 10
@@ -46,7 +46,11 @@ float readScale(){
     //Serial.print("Weight sensed is ");
     //Serial.println(weight);
   }
-  return h.get_value();
+  float value = h.get_units();
+  // Serial.print(value);
+  // Serial.print(" ");
+  // Serial.println(heating);
+  return value;
 }
 
 void checkTooHot(){
@@ -76,12 +80,13 @@ void setup(){
   //setup and zero the sacle
   h.begin(scaleDataPin, scaleClockPin);
   h.tare();
-
+  h.set_scale(10000);
   dht.begin();
 
   pinMode(REPLAY_PIN, OUTPUT);
 
   digitalWrite(LED_BUILTIN, HIGH);
+  Serial.println("Readdy");
 }
 
 void checkCatHeating(){
@@ -91,25 +96,27 @@ void checkCatHeating(){
     float weight = readScale();
     //if the sclae reading is mroe the the weight it should turn off at then keep it on
     if(weight > MIN_OFF_WEIGHT){
+      //Serial.println("High Weight");
       return;
     }
+    Serial.println("Turning Off");
 
     //take a picture with the camera
-    bool isCat=true;;
+    bool isCat=false;;
     //send the picture to the could for processing
-    HTTPResponse catImageresponse = setialInputPostRequest("/isCat",IMAGE_DATA_LENGTH, NUMBER_OF_IMAGE_LINES);//read image / send image to the cloud
+    // HTTPResponse catImageresponse = setialInputPostRequest("/isCat",IMAGE_DATA_LENGTH, NUMBER_OF_IMAGE_LINES);//read image / send image to the cloud
 
 
-    if(responseOK(&catImageresponse)){
-      isCat = catImageresponse.content[0] == '1';
-    }else{
-      //perhaps stop heating here just to be safe
-      // Serial.print("Cloud returned an error: ");
-      // Serial.println(catImageresponse.status);
-      // Serial.println(catImageresponse.content);
-      //if the cloud resturned an error then return
-      return;
-    }
+    // if(responseOK(&catImageresponse)){
+    //   isCat = catImageresponse.content[0] == '1';
+    // }else{
+    //   //perhaps stop heating here just to be safe
+    //   // Serial.print("Cloud returned an error: ");
+    //   // Serial.println(catImageresponse.status);
+    //   // Serial.println(catImageresponse.content);
+    //   //if the cloud resturned an error then return
+    //   return;
+    // }
     
 
     //if there is not a cat presenet:
@@ -117,6 +124,7 @@ void checkCatHeating(){
 
       //turn the heating off
 
+      heating = false;
       //tell the cloud that heating has stopped using the heating event ID from before
       HTTPResponse heatingStartResponse = basicGetRequest("/heatingStopped?id="+currentHeatingEventID);
       if(responseOK(&heatingStartResponse)){
@@ -129,7 +137,7 @@ void checkCatHeating(){
         return;
       }
 
-      heating = false;
+      
     }
 }
 
@@ -140,25 +148,26 @@ void checkCatNotHeating(){
     //if the value might indicate a cat:
     float weight = readScale();
     //if the sclae reading is more the the weight it should turn on at then turn it on
-    if(weight > MIN_ON_WEIGHT){
+    if(weight < MIN_ON_WEIGHT){
+      //Serial.println("Low Weight");
       return;
     }
-    
+    Serial.println("Turning On");
     //take a picture with the camera
     bool isCat=true;;
     //send the picture to the could for processing
-    HTTPResponse catImageresponse = setialInputPostRequest("/isCat",IMAGE_DATA_LENGTH, NUMBER_OF_IMAGE_LINES);//read image / send image to the cloud
+    // HTTPResponse catImageresponse = setialInputPostRequest("/isCat",IMAGE_DATA_LENGTH, NUMBER_OF_IMAGE_LINES);//read image / send image to the cloud
     
-    //check the response status
-    if(responseOK(&catImageresponse)){
-      isCat = catImageresponse.content[0] == '1';
-    }else{
-      // Serial.print("Cloud returned an error: ");
-      // Serial.println(catImageresponse.status);
-      // Serial.println(catImageresponse.content);
-      //if the cloud resturned an error then return
-      return;
-    }
+    // //check the response status
+    // if(responseOK(&catImageresponse)){
+    //   isCat = catImageresponse.content[0] == '1';
+    // }else{
+    //   // Serial.print("Cloud returned an error: ");
+    //   // Serial.println(catImageresponse.status);
+    //   // Serial.println(catImageresponse.content);
+    //   //if the cloud resturned an error then return
+    //   return;
+    // }
     //if it is a cat:
     if(isCat){
 
@@ -168,6 +177,12 @@ void checkCatNotHeating(){
       HTTPResponse heatingStartResponse = basicGetRequest("/heatingStarted");
       if(responseOK(&heatingStartResponse)){
         currentHeatingEventID = heatingStartResponse.content;
+
+        Serial.println(heatingStartResponse.status);
+        Serial.println(heatingStartResponse.contentLength);
+        Serial.println(heatingStartResponse.contentType);
+        Serial.println(heatingStartResponse.contentEncoding);
+        Serial.println(heatingStartResponse.content);
       }else{
         // Serial.print("Cloud returned an error: ");
         // Serial.println(heatingStartResponse.status);
@@ -195,7 +210,8 @@ void loop(){
   checkTooHot();
 
   digitalWrite(REPLAY_PIN, heating && !tooHot);
-  while(1){
-    delay(5000);
-  }
+  digitalWrite(LED_BUILTIN, heating && !tooHot);
+  // while(1){
+  //   delay(5000);
+  // }
 }
