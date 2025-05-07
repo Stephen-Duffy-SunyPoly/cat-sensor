@@ -1,13 +1,16 @@
 #include <WiFiS3.h>
 
 //WARNING NEVER COMMIT ACTUAL WIFI CREDENTIALS
-const char WIFI_NAME[] = "CBI2 2796";
-const char WIFI_PASSWORD[] = "2]766E7e";
+const char WIFI_NAME[] = "TestWifi";
+const char WIFI_PASSWORD[] = "686sV:18";
 int status = WL_IDLE_STATUS;
 
 
 const String CLOUD_ADDRESS = "192.168.137.1";//make sure to set this to the correct ip for the cloud device
 const uint16_t CLOUD_PORT = 8080;
+
+//160*120 grayscale images
+#define IMAGE_DATA_LENGTH (160*120)
 
 struct HTTPResponse{
   int status = -1;
@@ -20,7 +23,7 @@ struct HTTPResponse{
 void connectToWIFI(){
   // check for the WiFi module:
   if (WiFi.status() == WL_NO_MODULE) {
-    //Serial.println("Communication with WiFi module failed!");
+    Serial.println("Communication with WiFi module failed!");
     // don't continue
     while (true){
       delay(1000);
@@ -29,19 +32,19 @@ void connectToWIFI(){
 
   // attempt to connect to WiFi network:
   while (status != WL_CONNECTED) {
-    // Serial.print("Attempting to connect to WPA SSID: ");
-    // Serial.println(WIFI_NAME);
-    // Connect to WPA/WPA2 network:
+     Serial.print("Attempting to connect to WPA SSID: ");
+     Serial.println(WIFI_NAME);
+     //Connect to WPA/WPA2 network:
     status = WiFi.begin(WIFI_NAME, WIFI_PASSWORD);
 
     // wait 10 seconds for connection:
     delay(10000);
   }
   // you're connected now, so print out the data:
-  //Serial.println("Connected to the network");
+  Serial.println("Connected to the network");
   IPAddress ip = WiFi.localIP();
-  //Serial.print("IP Address: ");
-  //Serial.println(ip);
+  Serial.print("IP Address: ");
+  Serial.println(ip);
 }
 
 bool responseOK(HTTPResponse *response){
@@ -158,7 +161,7 @@ void exampleHTTPResuest(String requestPath){
     client.println("Connection: close");
     client.println();
   }else{
-    //Serial.println("Error: failed to connect to cloud");
+    Serial.println("Error: failed to connect to cloud");
     return;
   }
   delay(1000);
@@ -227,29 +230,42 @@ HTTPResponse basicPostRequest(String requestPath,char data[], int dataLength){
   return readResponse(&client);
 }
 
-HTTPResponse setialInputPostRequest(String requestPath, int dataLength, int numLines){
+HTTPResponse setialInputPostRequest(String requestPath){
   WiFiClient client;//HTTP client for interacting with the cloud
   //make the connection
   if (client.connect(CLOUD_ADDRESS.c_str(), CLOUD_PORT)) {
+    Serial.println("Beginning transmission");
     // manually set the http headers:
     client.println("POST "+requestPath+" HTTP/1.1");//set request method, path, and protocall
     client.println("Host: example.internal");//the only header that is required by the HTTP standard
     client.println("Connection: close");
-    client.print("Content-Length: "); client.println(dataLength);
+    client.print("Content-Length: "); client.println(IMAGE_DATA_LENGTH);
     client.println();//blank line to seperate the headers and data
     
 
     int index = 0;//index for the a=matix LED's
-    char byteBuffer[IMAGE_DATA_LENGTH/NUMBER_OF_IMAGE_LINES];//tmp buffer to hold some of the data localy
+    char byteBuffer[IMAGE_DATA_LENGTH];//tmp buffer to hold the data localy
     Serial1.available();//may ne be nessarry
-    //loop enough times to read all the data
-    for(int i=0;i<dataLength;i+=IMAGE_DATA_LENGTH/NUMBER_OF_IMAGE_LINES){
-      Serial1.write((char)1);//singal the camera to start sending image data
-      //read a single line worth of bytes bytes from the serial connection
-      Serial1.readBytes(byteBuffer,IMAGE_DATA_LENGTH/NUMBER_OF_IMAGE_LINES);
-      //wright those bytes to the could
-      client.write(byteBuffer,IMAGE_DATA_LENGTH/NUMBER_OF_IMAGE_LINES);
-      //stuf for animating the LED matix
+    
+    //Keep track of how much of the image we've captured so far
+    int bytes_read = 0;
+
+
+
+    Serial1.write((char)1);//signal the camera to start sending image data
+
+    //Eat the header bytes
+    while(!Serial1.find("Vsync"));
+    //checksum byte (we don't care)
+    while(Serial1.read() == -1);
+
+    while(bytes_read < IMAGE_DATA_LENGTH)
+    {
+      bytes_read += Serial1.readBytes(byteBuffer, IMAGE_DATA_LENGTH - bytes_read);
+    }
+
+    client.write(byteBuffer, IMAGE_DATA_LENGTH); //Send all the data at once because we can (?)
+      /*
       if(true){
         //1 light = 1 line 
         uint8_t * frame2 = (uint8_t *)frame;
@@ -257,11 +273,12 @@ HTTPResponse setialInputPostRequest(String requestPath, int dataLength, int numL
         matrix.renderBitmap(frame, 8, 12);
         index = (index+1) % (8*12);
       }
-    }
+      */
+    
     //make sure to tell the camera not to send more data
     Serial1.write((char)0);
   }else{
-    //Serial.println("Error: failed to connect to cloud");
+    Serial.println("Error: failed to connect to cloud");
     return {};//return  an empty structure
   }
   //wait a momnet fot the request to reach the cloud
