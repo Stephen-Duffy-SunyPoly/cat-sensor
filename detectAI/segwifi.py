@@ -3,7 +3,7 @@
 Created on Wed Apr 16 16:25:25 2025
 
 @author: wdogw
-(With some help from our robot friend ChatGPT.)
+(With some(what less) help from our robot friend ChatGPT.)
 """
 
 import socket
@@ -19,6 +19,8 @@ os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 
 HOST = '0.0.0.0'  # The IP address of your computer
 PORT = 33333           # Port to listen on
+
+image_size = 160 * 120
 
 access_token = os.getenv("HF_API_KEY")
 model="google/deeplabv3_mobilenet_v2_1.0_513"
@@ -36,8 +38,8 @@ while True:
         # Accept a connection
         print(f"Connected by {addr}")
         buffer = b''
-        while len(buffer) < 320*240*2:
-            data = conn.recv(320*240*2)  # Receive up to 6 megabytes of data (a 1080p image)
+        while len(buffer) < image_size:
+            data = conn.recv(image_size)  # Receive up to 6 megabytes of data (a 1080p image)
             #print("Recieved " + str(len(data)) + " bytes.\n")
         
             buffer += data
@@ -46,31 +48,14 @@ while True:
         
         #print(data)    
         print("Recieved " + str(len(buffer)) + " bytes.\n")
-            
-        rgb565 = np.frombuffer(buffer, dtype=np.uint16)
-
-        # Create empty array to store RGB888 result
-        rgb888 = np.zeros((rgb565.size, 3), dtype=np.uint8)
         
-        # Split the RGB565 value into R, G, B components
-        rgb888[:, 0] = (rgb565 >> 11) & 0x1F  # Extract Red (5 bits)
-        rgb888[:, 1] = (rgb565 >> 5) & 0x3F   # Extract Green (6 bits)
-        rgb888[:, 2] = rgb565 & 0x1F          # Extract Blue (5 bits)
+        image = Image.frombytes("L", (160, 120), buffer)
         
-        # Scale to 8-bit (RGB888) by shifting and masking
-        rgb888[:, 0] = (rgb888[:, 0] << 3) | (rgb888[:, 0] >> 2)  # Scale Red
-        rgb888[:, 1] = (rgb888[:, 1] << 2) | (rgb888[:, 1] >> 4)  # Scale Green
-        rgb888[:, 2] = (rgb888[:, 2] << 3) | (rgb888[:, 2] >> 2)  # Scale Blue
-
-        rgb888 = rgb888.reshape(240, 320, 3)
-
-        image = Image.fromarray(rgb888, "RGB")
+        image.save("capture.png")
         
         p = pipeline("image-segmentation", use_fast=True, model=model, token=access_token)
         
         segments = p(image)
-
-        image.save("capture.png")
 
         has_cat = False
         for s in segments:
