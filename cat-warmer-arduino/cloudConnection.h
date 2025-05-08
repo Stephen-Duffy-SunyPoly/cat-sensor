@@ -1,8 +1,8 @@
 #include <WiFiS3.h>
 
 //WARNING NEVER COMMIT ACTUAL WIFI CREDENTIALS
-const char WIFI_NAME[] = "TestWifi";
-const char WIFI_PASSWORD[] = "686sV:18";
+const char WIFI_NAME[] = "WIFI NAME HERE";
+const char WIFI_PASSWORD[] = "WIFI PASSWORD HERE";
 int status = WL_IDLE_STATUS;
 
 
